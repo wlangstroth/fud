@@ -24,11 +24,7 @@ struct Food {
     protein_grams: f64
 }
 
-/*
- * Not strictly a meal, but a part of a meal.
- * TODO: Find a new name for this.
- */
-struct Meal {
+struct Ingredient {
     date_stamp: String,
     meal_code: String,
     food_code: String,
@@ -186,8 +182,8 @@ fn prompt_food() {
     });
 }
 
-fn add_meal(meal: Meal) {
-    let statement = format!("insert into meals(datestamp, meal_code, food_code, food_grams) values('{}','{}','{}',{})", meal.date_stamp, meal.meal_code, meal.food_code, meal.food_grams);
+fn add_ingredient(ingredient: Ingredient) {
+    let statement = format!("insert into meals(datestamp, meal_code, food_code, food_grams) values('{}','{}','{}',{})", ingredient.date_stamp, ingredient.meal_code, ingredient.food_code, ingredient.food_grams);
     let connection = db();
     connection.execute(statement).unwrap();
 }
@@ -212,7 +208,7 @@ fn prompt_meal() {
     let food_code = &input_vec[1];
     let food_grams = input_vec[2].parse::<f64>().expect("No parse");
 
-    add_meal(Meal {
+    add_ingredient(Ingredient {
         date_stamp: date_iso.to_string(),
         meal_code: meal_code.to_string(),
         food_code: food_code.to_string(),
