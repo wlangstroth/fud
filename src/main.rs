@@ -45,22 +45,25 @@ fn calories_from_values(fat_grams: f64,
     fat_grams * 9.0 + carbohydrate_grams * 4.0 + protein_grams * 4.0
 }
 
-fn prompt(prompts: Vec<&str>) -> Vec<String> {
-    let mut input_vec = Vec::new();
-    for p in prompts {
-        print!("{}: ", p);
-        if let Err(x) = io::stdout().flush() {
-            println!("could not flush: {}", x);
-        }
-        let mut input = String::new();
-        io::stdin().read_line(&mut input)
+fn single_prompt(prompt_str: &str) -> String {
+    print!("{}: ", prompt_str);
+    if let Err(x) = io::stdout().flush() {
+        println!("could not flush: {}", x);
+    }
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input)
         .ok()
         .expect("Could not read line.");
 
-        input = input.trim().to_string();
-        input_vec.push(input);
-    }
+    input.trim().to_string()
+}
 
+fn prompt(prompts: Vec<&str>) -> Vec<String> {
+    let mut input_vec = Vec::new();
+    for p in prompts {
+        input_vec.push(single_prompt(p));
+    }
     input_vec
 }
 
@@ -216,8 +219,8 @@ fn prompt_meal() {
         food_grams: food_grams
     });
 
-    let another = prompt(vec!["Another?"]);
-    if another[0] == "y" {
+    let another = single_prompt("Another?");
+    if another == "y" {
         prompt_meal();
     }
 }
