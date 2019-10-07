@@ -25,7 +25,7 @@ struct Food {
 }
 
 /*
- * Not strictly a meal, but a part of a meal. 
+ * Not strictly a meal, but a part of a meal.
  * TODO: Find a new name for this.
  */
 struct Meal {
@@ -56,11 +56,11 @@ fn prompt(prompts: Vec<&str>) -> Vec<String> {
         io::stdin().read_line(&mut input)
         .ok()
         .expect("Could not read line.");
-        
+
         input = input.trim().to_string();
         input_vec.push(input);
     }
-    
+
     input_vec
 }
 
@@ -70,24 +70,24 @@ fn check() {
     let date_stamp = local.format("%F");
     // let date_prompt = format!("Date [{}]", date_stamp);
     // let prompts = vec![date_prompt.as_str()];
-    // 
+    //
     // let mut input_vec = prompt(prompts);
-    // 
+    //
     // if input_vec[0] == "" {
     //     input_vec[0] = date_stamp.to_string();
     // }
-    
+
     let connection = fud_connection();
-    
-    let statement = " 
+
+    let statement = "
         SELECT m.meal_code,
             SUM(f.fat_grams / f.portion_grams * m.food_grams),
             SUM(f.carbohydrate_grams / f.portion_grams * m.food_grams),
             SUM(f.protein_grams / f.portion_grams * m.food_grams)
         FROM meals m, foods f
         WHERE m.food_code = f.food_code and m.datestamp=?
-        GROUP BY 
-            (CASE m.meal_code 
+        GROUP BY
+            (CASE m.meal_code
             WHEN 'B'
             THEN 1
             WHEN 'L'
@@ -100,39 +100,39 @@ fn check() {
             THEN 5
             END)
     ";
-    
+
     let mut cursor = connection
         .prepare(statement)
         .unwrap()
         .cursor();
-        
+
     cursor.bind(&[Value::String(date_stamp.to_string())]).unwrap();
-    
+
     println!("For {}", date_stamp.to_string());
     let mut fat_total: f64 = 0.0;
     let mut carbohydrate_total: f64 = 0.0;
     let mut protein_total: f64 = 0.0;
     let mut calorie_total: f64 = 0.0;
-    
+
     println!("┌───┬───────┬───────┬───────┬────────┐");
     println!("│ M │   F   │   C   │   P   │  Cal   │");
     println!("├───┼───────┼───────┼───────┼────────┤");
-    
+
     while let Some(row) = cursor.next().unwrap() {
         let meal_code = row[0].as_string().unwrap();
         let fat_grams = row[1].as_float().unwrap();
         let carbohydrate_grams = row[2].as_float().unwrap();
         let protein_grams = row[3].as_float().unwrap();
-        let calories = 
+        let calories =
             calories_from_values(fat_grams, carbohydrate_grams, protein_grams);
-        
-        println!("│ {} │ {:5.1} │ {:5.1} │ {:5.1} │ {:6.0} │", 
+
+        println!("│ {} │ {:5.1} │ {:5.1} │ {:5.1} │ {:6.0} │",
             meal_code,
             fat_grams,
             carbohydrate_grams,
             protein_grams,
             calories);
-            
+
         fat_total += fat_grams;
         carbohydrate_total += carbohydrate_grams;
         protein_total += protein_grams;
@@ -140,22 +140,22 @@ fn check() {
     }
 
     println!("├───┼───────┼───────┼───────┼────────┤");
-    println!("│ T │ {:5.1} │ {:5.1} │ {:5.1} │ {:6.0} │", 
-            fat_total, 
-            carbohydrate_total, 
+    println!("│ T │ {:5.1} │ {:5.1} │ {:5.1} │ {:6.0} │",
+            fat_total,
+            carbohydrate_total,
             protein_total,
             calorie_total);
-            
+
     println!("└───┴───────┴───────┴───────┴────────┘");
 }
 
-fn add_food(food: Food) {  
+fn add_food(food: Food) {
     let statement = format!("insert into foods(food_code, description, portion_grams, fat_grams, carbohydrate_grams, protein_grams) values('{}','{}',{},{},{},{})", food.food_code, food.description, food.portion_grams, food.fat_grams, food.carbohydrate_grams, food.protein_grams);
     let connection = fud_connection();
     connection.execute(statement).unwrap();
 }
 
-fn prompt_food() {  
+fn prompt_food() {
     let prompts = vec![ "Food code"
                       , "Description"
                       , "Portion (g)"
@@ -163,16 +163,16 @@ fn prompt_food() {
                       , "Carbohydrates (g)"
                       , "Protein (g)"
                       ];
-                      
+
     let input_vec = prompt(prompts);
-    
+
     let food_code = &input_vec[0];
     let description = &input_vec[1];
     let portion_grams_float = input_vec[2].parse::<f64>().expect("No parse");
     let fat_grams_float = input_vec[3].parse::<f64>().expect("No parse");
     let carbohydrate_grams_float = input_vec[4].parse::<f64>().expect("No parse");
     let protein_grams_float = input_vec[5].parse::<f64>().expect("No parse");
-    
+
     add_food(Food {
         food_code: food_code.to_string(),
         description: description.to_string(),
@@ -183,7 +183,7 @@ fn prompt_food() {
     });
 }
 
-fn add_meal(meal: Meal) {  
+fn add_meal(meal: Meal) {
     let statement = format!("insert into meals(datestamp, meal_code, food_code, food_grams) values('{}','{}','{}',{})", meal.date_stamp, meal.meal_code, meal.food_code, meal.food_grams);
     let connection = fud_connection();
     connection.execute(statement).unwrap();
@@ -198,24 +198,24 @@ fn prompt_meal() {
                       , "Food code"
                       , "Portion size (g)"
                       ];
-    
+
     let input_vec = prompt(prompts);
-    
+
     // if input_vec[0] == "" {
     //     input_vec[0] = date_stamp.to_string();
     // }
-    
+
     let meal_code = &input_vec[0];
     let food_code = &input_vec[1];
     let food_grams = input_vec[2].parse::<f64>().expect("No parse");
-    
+
     add_meal(Meal {
         date_stamp: date_iso.to_string(),
         meal_code: meal_code.to_string(),
         food_code: food_code.to_string(),
         food_grams: food_grams
     });
-    
+
     let another = prompt(vec!["Another?"]);
     if another[0] == "y" {
         prompt_meal();
@@ -224,7 +224,7 @@ fn prompt_meal() {
 
 fn list_foods() {
     let connection = fud_connection();
-    
+
     let statement = "SELECT food_code,
                             description,
                             portion_grams,
@@ -232,15 +232,15 @@ fn list_foods() {
                             carbohydrate_grams,
                             protein_grams
                         FROM foods";
-    
+
     let mut cursor = connection
                         .prepare(statement)
                         .unwrap()
                         .cursor();
-                        
+
     println!("| {:4} | {:38} | {:5} | {:5} | {:5} | {:5} |", "Food", "Description", "  g", "  F", "  C", "  P");
     while let Some(row) = cursor.next().unwrap() {
-        println!("| {:4} | {:38} | {:5.1} | {:5.1} | {:5.1} | {:5.1} |", 
+        println!("| {:4} | {:38} | {:5.1} | {:5.1} | {:5.1} | {:5.1} |",
         row[0].as_string().unwrap(),
         row[1].as_string().unwrap(),
         row[2].as_float().unwrap(),
@@ -253,11 +253,11 @@ fn list_foods() {
 fn list_meals() {
     println!("Meal list");
     let connection = fud_connection();
-    
-    let statement = 
-        "SELECT * FROM meals 
-            ORDER BY datestamp, 
-                (CASE meal_code 
+
+    let statement =
+        "SELECT * FROM meals
+            ORDER BY datestamp,
+                (CASE meal_code
                     WHEN 'B'
                     THEN 1
                     WHEN 'L'
@@ -270,14 +270,14 @@ fn list_meals() {
                     THEN 5
                     END)
         ";
-            
+
     let mut cursor = connection
                         .prepare(statement)
                         .unwrap()
                         .cursor();
-    
+
     while let Some(row) = cursor.next().unwrap() {
-        println!("| {} | {} | {} | {:5} |", 
+        println!("| {} | {} | {} | {:5} |",
                 row[0].as_string().unwrap(),
                 row[1].as_string().unwrap(),
                 row[2].as_string().unwrap(),
@@ -325,10 +325,10 @@ fn main() {
                             .takes_value(true)))
                     .subcommand(SubCommand::with_name("plan")
                         .about("See the meal plan"));
-                    
-                    
+
+
     let matches = app.get_matches();
-    
+
     match matches.subcommand_name() {
         Some("food") => prompt_food(),
         Some("meal") => prompt_meal(),
