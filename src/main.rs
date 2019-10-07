@@ -67,14 +67,6 @@ fn check() {
     show_plan();
     let local: DateTime<Local> = Local::now();
     let date_stamp = local.format("%F");
-    // let date_prompt = format!("Date [{}]", date_stamp);
-    // let prompts = vec![date_prompt.as_str()];
-    //
-    // let mut input_vec = prompt(prompts);
-    //
-    // if input_vec[0] == "" {
-    //     input_vec[0] = date_stamp.to_string();
-    // }
 
     let connection = db();
 
@@ -191,7 +183,6 @@ fn add_ingredient(ingredient: Ingredient) {
 fn prompt_meal() {
     let local: DateTime<Local> = Local::now();
     let date_iso = local.format("%F");
-    // let date_prompt = format!("Date [{}]", date_iso);
     // TODO: prompt for date if flagged
     let prompts = vec![ "Meal code"
                       , "Food code"
@@ -199,10 +190,6 @@ fn prompt_meal() {
                       ];
 
     let input_vec = prompt(prompts);
-
-    // if input_vec[0] == "" {
-    //     input_vec[0] = date_stamp.to_string();
-    // }
 
     let meal_code = &input_vec[0];
     let food_code = &input_vec[1];
@@ -324,7 +311,6 @@ fn main() {
                             .takes_value(true)))
                     .subcommand(SubCommand::with_name("plan")
                         .about("See the meal plan"));
-
 
     let matches = app.get_matches();
 
