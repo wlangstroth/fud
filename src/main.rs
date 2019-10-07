@@ -35,7 +35,7 @@ struct Meal {
     food_grams: f64
 }
 
-fn fud_connection() -> sqlite::Connection {
+fn db() -> sqlite::Connection {
     sqlite::open("fud.db").expect("Could not open database")
 }
 
@@ -77,7 +77,7 @@ fn check() {
     //     input_vec[0] = date_stamp.to_string();
     // }
 
-    let connection = fud_connection();
+    let connection = db();
 
     let statement = "
         SELECT m.meal_code,
@@ -151,7 +151,7 @@ fn check() {
 
 fn add_food(food: Food) {
     let statement = format!("insert into foods(food_code, description, portion_grams, fat_grams, carbohydrate_grams, protein_grams) values('{}','{}',{},{},{},{})", food.food_code, food.description, food.portion_grams, food.fat_grams, food.carbohydrate_grams, food.protein_grams);
-    let connection = fud_connection();
+    let connection = db();
     connection.execute(statement).unwrap();
 }
 
@@ -185,7 +185,7 @@ fn prompt_food() {
 
 fn add_meal(meal: Meal) {
     let statement = format!("insert into meals(datestamp, meal_code, food_code, food_grams) values('{}','{}','{}',{})", meal.date_stamp, meal.meal_code, meal.food_code, meal.food_grams);
-    let connection = fud_connection();
+    let connection = db();
     connection.execute(statement).unwrap();
 }
 
@@ -223,7 +223,7 @@ fn prompt_meal() {
 }
 
 fn list_foods() {
-    let connection = fud_connection();
+    let connection = db();
 
     let statement = "SELECT food_code,
                             description,
@@ -252,7 +252,7 @@ fn list_foods() {
 
 fn list_meals() {
     println!("Meal list");
-    let connection = fud_connection();
+    let connection = db();
 
     let statement =
         "SELECT * FROM meals
