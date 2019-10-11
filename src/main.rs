@@ -32,7 +32,8 @@ struct Ingredient {
 }
 
 fn db() -> sqlite::Connection {
-    sqlite::open("fud.db").expect("Could not open database")
+    let path = shellexpand::tilde("~/.fud/fud.db");
+    sqlite::open(path.to_string()).expect("Could not open database")
 }
 
 fn calories_from_values(fat_grams: f64,
