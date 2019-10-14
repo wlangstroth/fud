@@ -22,4 +22,5 @@ helpful start.
 ## The Ratios
 
 The ratios as they are set up are for "recomposition", which is code for
-"gentle fat loss". Check out the article for more aggressive 
+"gentle fat loss". Check out the article for more aggressive fat loss or muscle
+growth.
