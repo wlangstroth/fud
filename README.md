@@ -1,5 +1,7 @@
 # fud
 
+![cat fud far side comic](http://langstroth.net/img/cat-fud.jpg "Cat Fud")
+
 Command line interface for managing macronutrient-based diets. Not fancy.
 
 ## Why this might be useful to you
