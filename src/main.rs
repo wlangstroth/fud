@@ -9,7 +9,7 @@ use chrono::prelude::*;
 
 use sqlite::Value;
 
-// TODO: These should be in a configuration file
+// TODO: These should be in a configuration file. They are not used yet.
 // const FAT_FACTOR: f64 = 0.35;
 // const CARBOHYDRATE_FACTOR: f64 = 1.25;
 // const PROTEIN_FACTOR: f64 = 1.15;
@@ -176,15 +176,21 @@ fn prompt_food() {
 }
 
 fn add_ingredient(ingredient: Ingredient) {
-    let statement = format!("insert into meals(datestamp, meal_code, food_code, food_grams) values('{}','{}','{}',{})", ingredient.date_stamp, ingredient.meal_code, ingredient.food_code, ingredient.food_grams);
+    let statement = format!(
+        "insert into meals(datestamp, meal_code, food_code, food_grams)
+            values('{}','{}','{}',{})",
+        ingredient.date_stamp,
+        ingredient.meal_code,
+        ingredient.food_code,
+        ingredient.food_grams);
     let connection = db();
     connection.execute(statement).unwrap();
 }
 
-fn prompt_meal() {
-    let local: DateTime<Local> = Local::now();
-    let date_iso = local.format("%F");
-    // TODO: prompt for date if flagged
+fn prompt_meal(iso_date: String) {
+    // let local: DateTime<Local> = Local::now();
+    // let iso_date = local.format("%F");
+    println!("For {}", iso_date);
     let prompts = vec![ "Meal code"
                       , "Food code"
                       , "Portion size (g)"
@@ -197,7 +203,7 @@ fn prompt_meal() {
     let food_grams = input_vec[2].parse::<f64>().expect("No parse");
 
     add_ingredient(Ingredient {
-        date_stamp: date_iso.to_string(),
+        date_stamp: iso_date.to_string(),
         meal_code: meal_code.to_string(),
         food_code: food_code.to_string(),
         food_grams: food_grams
@@ -205,7 +211,7 @@ fn prompt_meal() {
 
     let another = single_prompt("Another?");
     if another == "y" {
-        prompt_meal();
+        prompt_meal(iso_date);
     }
 }
 
@@ -285,7 +291,7 @@ fn show_plan() {
 
 fn main() {
     let app = App::new("fud")
-                    .version("0.1")
+                    .version("0.2.1")
                     .author("Will Langstroth <will@langstroth.com")
                     .about("Keep track of your eating.")
                     .subcommand(SubCommand::with_name("meal")
@@ -303,7 +309,7 @@ fn main() {
                     .subcommand(SubCommand::with_name("foods")
                         .about("See the list of foods"))
                     .subcommand(SubCommand::with_name("check")
-                        .about("Check a today's meals")
+                        .about("Check a day's meals (default today)")
                         .arg(Arg::with_name("date")
                             .short("d")
                             .long("date")
@@ -315,9 +321,22 @@ fn main() {
 
     let matches = app.get_matches();
 
+    let date: DateTime<Local> = Local::now();
+    let mut iso_date: String = date.format("%F").to_string();
+
+    // This looks rough. Is clap really like this?
+    if let Some(s) = matches.subcommand_matches("meal") {
+        if let Some(d) = s.value_of("date") {
+            println!("{}", date);
+            iso_date = d.to_string();
+        }
+    }
+
+    println!("{:?}", matches);
+
     match matches.subcommand_name() {
         Some("food") => prompt_food(),
-        Some("meal") => prompt_meal(),
+        Some("meal") => prompt_meal(iso_date),
         Some("foods") => list_foods(),
         Some("meals") => list_meals(),
         Some("plan") => show_plan(),
