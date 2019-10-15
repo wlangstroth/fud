@@ -188,30 +188,26 @@ fn add_ingredient(ingredient: Ingredient) {
 }
 
 fn prompt_meal(iso_date: String) {
-    // let local: DateTime<Local> = Local::now();
-    // let iso_date = local.format("%F");
-    println!("For {}", iso_date);
-    let prompts = vec![ "Meal code"
-                      , "Food code"
-                      , "Portion size (g)"
-                      ];
+    // go until interrupted by ctrl-c
+    loop {
+        println!("For {}", iso_date);
+        let prompts = vec![ "Meal code"
+            , "Food code"
+            , "Portion size (g)"
+        ];
 
-    let input_vec = prompt(prompts);
+        let input_vec = prompt(prompts);
 
-    let meal_code = &input_vec[0];
-    let food_code = &input_vec[1];
-    let food_grams = input_vec[2].parse::<f64>().expect("No parse");
+        let meal_code = &input_vec[0];
+        let food_code = &input_vec[1];
+        let food_grams = input_vec[2].parse::<f64>().expect("No parse");
 
-    add_ingredient(Ingredient {
-        date_stamp: iso_date.to_string(),
-        meal_code: meal_code.to_string(),
-        food_code: food_code.to_string(),
-        food_grams: food_grams
-    });
-
-    let another = single_prompt("Another?");
-    if another == "y" {
-        prompt_meal(iso_date);
+        add_ingredient(Ingredient {
+            date_stamp: iso_date.to_string(),
+            meal_code: meal_code.to_string(),
+            food_code: food_code.to_string(),
+            food_grams: food_grams
+        });
     }
 }
 
@@ -324,7 +320,6 @@ fn main() {
     let date: DateTime<Local> = Local::now();
     let mut iso_date: String = date.format("%F").to_string();
 
-    // This looks rough. Is clap really like this?
     if let Some(s) = matches.subcommand_matches("meal") {
         if let Some(d) = s.value_of("date") {
             println!("{}", date);
@@ -332,7 +327,7 @@ fn main() {
         }
     }
 
-    println!("{:?}", matches);
+    // println!("{:?}", matches);
 
     match matches.subcommand_name() {
         Some("food") => prompt_food(),
@@ -342,6 +337,6 @@ fn main() {
         Some("plan") => show_plan(),
         Some("check") => check(),
         None => (),
-        _ => println!("Some other subcommand was used"),
+        _ => println!("An invalid subcommand was used"),
     }
 }
