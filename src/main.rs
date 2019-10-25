@@ -64,11 +64,8 @@ fn prompt(prompts: Vec<&str>) -> Vec<String> {
     input_vec
 }
 
-fn check() {
+fn check(iso_date: String) {
     show_plan();
-    let local: DateTime<Local> = Local::now();
-    let date_stamp = local.format("%F");
-
     let connection = db();
 
     let statement = "
@@ -98,9 +95,9 @@ fn check() {
         .unwrap()
         .cursor();
 
-    cursor.bind(&[Value::String(date_stamp.to_string())]).unwrap();
+    cursor.bind(&[Value::String(iso_date.to_string())]).unwrap();
 
-    println!("For {}", date_stamp.to_string());
+    println!("For {}", iso_date.to_string());
     let mut fat_total: f64 = 0.0;
     let mut carbohydrate_total: f64 = 0.0;
     let mut protein_total: f64 = 0.0;
@@ -188,13 +185,12 @@ fn add_ingredient(ingredient: Ingredient) {
 }
 
 fn prompt_meal(iso_date: String) {
-    // go until interrupted by ctrl-c
     loop {
         println!("For {}", iso_date);
         let prompts = vec![ "Meal code"
-            , "Food code"
-            , "Portion size (g)"
-        ];
+                          , "Food code"
+                          , "Portion size (g)"
+                          ];
 
         let input_vec = prompt(prompts);
 
@@ -320,14 +316,20 @@ fn main() {
     let date: DateTime<Local> = Local::now();
     let mut iso_date: String = date.format("%F").to_string();
 
-    if let Some(s) = matches.subcommand_matches("meal") {
+    println!("{:?}", matches);
+
+   if let Some(s) = matches.subcommand_matches("meal") {
+        if let Some(d) = s.value_of("date") {
+            println!("{}", date);
+            iso_date = d.to_string();
+        }
+   }
+   if let Some(s) = matches.subcommand_matches("check") {
         if let Some(d) = s.value_of("date") {
             println!("{}", date);
             iso_date = d.to_string();
         }
     }
-
-    // println!("{:?}", matches);
 
     match matches.subcommand_name() {
         Some("food") => prompt_food(),
@@ -335,7 +337,7 @@ fn main() {
         Some("foods") => list_foods(),
         Some("meals") => list_meals(),
         Some("plan") => show_plan(),
-        Some("check") => check(),
+        Some("check") => check(iso_date),
         None => (),
         _ => println!("An invalid subcommand was used"),
     }
