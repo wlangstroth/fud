@@ -273,9 +273,9 @@ fn list_meals() {
 fn show_plan() {
     println!("Rough plan outline");
     println!("                          F    C   P");
-    println!("Breakfast      7:00       10  40   40");
+    println!("Breakfast      7:30       10  40   40");
     println!("Lunch         11:00       20  70   80");
-    println!("Afternoon     15:00        5  30   10");
+    println!("Afternoon     14:30        5  30   10");
     println!("Dinner        18:00       25  70   60");
     println!("Evening       22:00        5  30   30");
     println!("                          65 240  220");
